@@ -174,10 +174,11 @@
     export default {
         inject: ['dismiss', 'element', 'buttons', 'dismissable'],
         mounted() {
-            this.$refs.element.appendChild(this.element);
-            setTimeout(() => {
-                this.$refs.element.focus();
-            }, 0);
+            const element = this.$refs.element;
+            element.appendChild(this.element);
+            this.$nextTick(() => {
+                element.focus();
+            });
         },
         methods: {
             destroy: function () {
