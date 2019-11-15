@@ -31,6 +31,14 @@ define([
                     key: "sin",
                     name: "Sine",
                     formatString: '%0.2f',
+                    filters: [
+                        {
+                            comparator: 'equals'
+                        },
+                        {
+                            possibleValues: [{value: true, label: 'Realtime'}, {value: false, label: 'Recorded'}]
+                        }
+                    ],
                     hints: {
                         range: 1
                     }
