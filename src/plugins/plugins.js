@@ -44,7 +44,8 @@ define([
     './filters/plugin',
     './objectMigration/plugin',
     './goToOriginalAction/plugin',
-    './clearData/plugin'
+    './clearData/plugin',
+    './testPlugin/plugin'
 ], function (
     _,
     UTCTimeSystem,
@@ -69,7 +70,8 @@ define([
     Filters,
     ObjectMigration,
     GoToOriginalAction,
-    ClearData
+    ClearData,
+    TestPlugin
 ) {
     var bundleMap = {
         LocalStorage: 'platform/persistence/local',
@@ -170,6 +172,8 @@ define([
     plugins.ObjectMigration = ObjectMigration.default;
     plugins.GoToOriginalAction = GoToOriginalAction.default;
     plugins.ClearData = ClearData;
+
+    plugins.TestPlugin = TestPlugin;
 
     return plugins;
 });
