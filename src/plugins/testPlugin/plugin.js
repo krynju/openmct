@@ -1,9 +1,10 @@
 /*global define*/
 
+const BACKEND_ADDRESS = "http://localhost:5000";
+
 async function fetchData() {
-    let response = await fetch("http://localhost:5000/data", {method: "get"});
-    let data = await response.json();
-    return data;
+    let response = await fetch(BACKEND_ADDRESS + "/data", {method: "get"});
+    return await response.json();
 }
 
 define([
