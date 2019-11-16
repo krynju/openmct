@@ -1,5 +1,11 @@
 /*global define*/
 
+async function fetchData() {
+    let response = await fetch("http://localhost:5000/data", {method: "get"});
+    let data = await response.json();
+    return data;
+}
+
 define([
 
 ], function (
@@ -8,6 +14,7 @@ define([
 
     let installed = false;
 
+
     function TestPlugin() {
         return function install(openmct) {
             if (installed) {
@@ -15,9 +22,12 @@ define([
             }
             installed = true;
 
-            console.log("hey test plugin is here")
+            console.log("hey test plugin is here");
 
             // openmct.legacyRegistry.enable("openmct/plot");
+
+            fetchData()
+                .then(data => console.log(data))
         };
     }
 
