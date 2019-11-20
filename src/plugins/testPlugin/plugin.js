@@ -47,7 +47,9 @@ let objectProvider = {
 
 let compositionProvider = {
     appliesTo: function (domainObject) {
-        return domainObject.identifier.namespace === 'example.namespace';
+        return domainObject.identifier.namespace.includes('example')
+            && domainObject.hasOwnProperty('hasComposition')
+            && domainObject['hasComposition'] === true;
     },
     load: function (domainObject) {
         return getComposition(domainObject.identifier.key)
@@ -68,9 +70,6 @@ define([], function () {
                 return;
             }
             installed = true;
-
-            // openmct.legacyRegistry.enable("openmct/plot");
-
 
             openmct.objects.addRoot({
                 namespace: 'example.namespace',
