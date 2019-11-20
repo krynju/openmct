@@ -2,8 +2,14 @@
 
 const BACKEND_ADDRESS = "http://localhost:5000";
 
-async function fetchData() {
-    let response = await fetch(BACKEND_ADDRESS + "/data", {method: "get"});
+async function fetchData(key, options) {
+    let response = await fetch(
+        BACKEND_ADDRESS + "/historical"
+        + '?key=' + key.toString()
+        + '&start=' + options.start.toString()
+        + '&end=' + options.end.toString()
+        + '&domain=' + options.domain.toString(),
+        {method: "get"});
     return await response.json();
 }
 
@@ -17,20 +23,29 @@ async function getComposition(key) {
     return await response.json()
 }
 
+let historicalDataProvider = {
+    supportsRequest: function (domainObject) {
+        return domainObject.type === 'sensor';
+    },
+    request: function (domainObject, options) {
+        return fetchData(domainObject.identifier.key, options)
+            .then(function (response) {
+                return response
+            });
+    }
+};
+
 let objectProvider = {
     get: function (identifier) {
         return getObject(identifier.key).then(function (result) {
-            return {
-                identifier: identifier,
-                name: result.name,
-                type: result.type
-            };
+            result.identifier = identifier;
+            return result
         });
     }
 };
 
 
-var compositionProvider = {
+let compositionProvider = {
     appliesTo: function (domainObject) {
         return domainObject.identifier.namespace === 'example.namespace';
     },
@@ -63,10 +78,11 @@ define([], function () {
             });
 
             openmct.objects.addProvider('example.namespace', objectProvider);
+            openmct.objects.addProvider('example.telemetry', objectProvider);
 
-            openmct.composition.addProvider(compositionProvider)
+            openmct.composition.addProvider(compositionProvider);
 
-
+            openmct.telemetry.addProvider(historicalDataProvider);
         };
     }
 
