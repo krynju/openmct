@@ -1,5 +1,7 @@
 /*global define*/
 
+const io = require('socket.io-client');
+
 const BACKEND_ADDRESS = "http://localhost:5000";
 
 async function fetchData(key, options) {
@@ -23,6 +25,16 @@ async function getComposition(key) {
     return await response.json()
 }
 
+let socket = io('http://localhost:5000');
+let listener = {};
+
+socket.on('subscriptionMessage', (message) => {
+    let p = JSON.parse(message);
+    if (listener[p.id]) {
+        listener[p.id](p);
+    }
+});
+
 let historicalDataProvider = {
     supportsRequest: function (domainObject) {
         return domainObject.type === 'sensor';
@@ -32,6 +44,19 @@ let historicalDataProvider = {
             .then(function (response) {
                 return response
             });
+    },
+    supportsSubscribe: function (domainObject, callback, options) {
+        return domainObject.hasOwnProperty('isSubscribable') &&
+            domainObject.isSubscribable === true
+    },
+    subscribe: function (domainObject, callback, options) {
+        listener[domainObject.identifier.key] = callback;
+        socket.emit('subscribe', domainObject.identifier.key);
+        return function unsubscribe() {
+            delete listener[domainObject.identifier.key];
+            socket.emit('unsubscribe', domainObject.identifier.key);
+        };
+
     }
 };
 
@@ -59,6 +84,7 @@ let compositionProvider = {
     }
 };
 
+
 define([], function () {
 
     let installed = false;
@@ -82,6 +108,8 @@ define([], function () {
             openmct.composition.addProvider(compositionProvider);
 
             openmct.telemetry.addProvider(historicalDataProvider);
+
+
         };
     }
 
