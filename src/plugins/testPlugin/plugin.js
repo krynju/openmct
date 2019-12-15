@@ -25,7 +25,7 @@ async function getComposition(key) {
     return await response.json()
 }
 
-let socket = io('http://localhost:5000');
+let socket = io(BACKEND_ADDRESS);
 let listener = {};
 
 socket.on('subscriptionMessage', (message) => {
