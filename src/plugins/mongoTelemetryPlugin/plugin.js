@@ -90,7 +90,7 @@ define([], function () {
     let installed = false;
 
 
-    function TestPlugin() {
+    function MongoTelemetryPlugin() {
         return function install(openmct) {
             if (installed) {
                 return;
@@ -100,6 +100,18 @@ define([], function () {
             openmct.objects.addRoot({
                 namespace: 'example.namespace',
                 key: '5dd297fb6824251bd4883780'
+            });
+
+            openmct.types.addType('sensor', {
+                name: 'Sensor',
+                description: 'Data source',
+                cssClass: 'icon-telemetry'
+            });
+
+            openmct.types.addType('smf.sensor', {
+                name: 'Sensor',
+                description: 'Data source',
+                cssClass: 'icon-telemetry'
             });
 
             openmct.objects.addProvider('example.namespace', objectProvider);
@@ -113,5 +125,5 @@ define([], function () {
         };
     }
 
-    return TestPlugin;
+    return MongoTelemetryPlugin;
 });

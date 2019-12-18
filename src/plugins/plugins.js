@@ -45,8 +45,7 @@ define([
     './objectMigration/plugin',
     './goToOriginalAction/plugin',
     './clearData/plugin',
-    './testPlugin/plugin',
-    '../../example/forms/bundle'
+    './mongoTelemetryPlugin/plugin'
 ], function (
     _,
     UTCTimeSystem,
@@ -72,8 +71,7 @@ define([
     ObjectMigration,
     GoToOriginalAction,
     ClearData,
-    TestPlugin,
-    ExampleFormController
+    MongoTelemetryPlugin
 ) {
     var bundleMap = {
         LocalStorage: 'platform/persistence/local',
@@ -175,8 +173,7 @@ define([
     plugins.GoToOriginalAction = GoToOriginalAction.default;
     plugins.ClearData = ClearData;
 
-    plugins.TestPlugin = TestPlugin;
-    plugins.ExampleFormController = ExampleFormController;
+    plugins.MongoTelemetryPlugin = MongoTelemetryPlugin;
 
     return plugins;
 });
