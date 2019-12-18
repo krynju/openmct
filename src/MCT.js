@@ -22,9 +22,9 @@
 
 define([
     'EventEmitter',
-    'legacyRegistry',
     'uuid',
-    './defaultRegistry',
+    './BundleRegistry',
+    './installDefaultBundles',
     './api/api',
     './api/overlays/OverlayAPI',
     './selection/Selection',
@@ -33,13 +33,12 @@ define([
     './adapter/indicators/legacy-indicators-plugin',
     './plugins/buildInfo/plugin',
     './ui/registries/ViewRegistry',
+    './plugins/imagery/plugin',
     './ui/registries/InspectorViewRegistry',
     './ui/registries/ToolbarRegistry',
     './ui/router/ApplicationRouter',
     './ui/router/Browse',
     '../platform/framework/src/Main',
-    './styles/core.scss',
-    './styles/notebook.scss',
     './ui/layout/Layout.vue',
     '../platform/core/src/objects/DomainObjectImpl',
     '../platform/core/src/capabilities/ContextualDomainObject',
@@ -50,9 +49,9 @@ define([
     'vue'
 ], function (
     EventEmitter,
-    legacyRegistry,
     uuid,
-    defaultRegistry,
+    BundleRegistry,
+    installDefaultBundles,
     api,
     OverlayAPI,
     Selection,
@@ -61,13 +60,12 @@ define([
     LegacyIndicatorsPlugin,
     buildInfoPlugin,
     ViewRegistry,
+    ImageryPlugin,
     InspectorViewRegistry,
     ToolbarRegistry,
     ApplicationRouter,
     Browse,
     Main,
-    coreStyles,
-    NotebookStyles,
     Layout,
     DomainObjectImpl,
     ContextualDomainObject,
@@ -95,12 +93,15 @@ define([
      */
     function MCT() {
         EventEmitter.call(this);
+        /* eslint-disable no-undef */
         this.buildInfo = {
             version: __OPENMCT_VERSION__,
             buildDate: __OPENMCT_BUILD_DATE__,
             revision: __OPENMCT_REVISION__,
             branch: __OPENMCT_BUILD_BRANCH__
         };
+        /* eslint-enable no-undef */
+
 
         this.legacyBundle = { extensions: {
             services: [
@@ -245,7 +246,8 @@ define([
 
         this.branding = BrandingAPI.default;
 
-        this.legacyRegistry = defaultRegistry;
+        this.legacyRegistry = new BundleRegistry();
+        installDefaultBundles(this.legacyRegistry);
 
         // Plugin's that are installed by default
 
@@ -255,15 +257,13 @@ define([
         this.install(LegacyIndicatorsPlugin());
         this.install(LicensesPlugin.default());
         this.install(RemoveActionPlugin.default());
-        this.install(this.plugins.ImportExport());
         this.install(this.plugins.FolderView());
         this.install(this.plugins.Tabs());
+        this.install(ImageryPlugin.default());
         this.install(this.plugins.FlexibleLayout());
         this.install(this.plugins.GoToOriginalAction());
-
-        if (typeof BUILD_CONSTANTS !== 'undefined') {
-            this.install(buildInfoPlugin(BUILD_CONSTANTS));
-        }
+        this.install(this.plugins.ImportExport());
+        this.install(this.plugins.WebPage());
     }
 
     MCT.prototype = Object.create(EventEmitter.prototype);
@@ -317,11 +317,26 @@ define([
      * @memberof module:openmct.MCT#
      * @method setAssetPath
      */
-    MCT.prototype.setAssetPath = function (path) {
-        this.legacyExtension('constants', {
-            key: "ASSETS_PATH",
-            value: path
-        });
+    MCT.prototype.setAssetPath = function (assetPath) {
+        this._assetPath = assetPath;
+    };
+
+    /**
+     * Get path to where assets are hosted.
+     * @memberof module:openmct.MCT#
+     * @method getAssetPath
+     */
+    MCT.prototype.getAssetPath = function () {
+        const assetPathLength = this._assetPath && this._assetPath.length;
+        if (!assetPathLength) {
+            return '/';
+        }
+
+        if (this._assetPath[assetPathLength - 1] !== '/') {
+            return this._assetPath + '/';
+        }
+
+        return this._assetPath;
     };
 
     /**
@@ -344,6 +359,8 @@ define([
             domElement = document.body;
         }
 
+        this.element = domElement;
+
         this.legacyExtension('runs', {
             depends: ['navigationService'],
             implementation: function (navigationService) {
@@ -360,8 +377,8 @@ define([
             this.legacyExtension('types', legacyDefinition);
         }.bind(this));
 
-        legacyRegistry.register('adapter', this.legacyBundle);
-        legacyRegistry.enable('adapter');
+        this.legacyRegistry.register('adapter', this.legacyBundle);
+        this.legacyRegistry.enable('adapter');
 
         this.router.route(/^\/$/, () => {
             this.router.setPath('/browse/');
@@ -373,7 +390,8 @@ define([
          * @event start
          * @memberof module:openmct.MCT~
          */
-        var startPromise = new Main().run(this.legacyRegistry)
+        const startPromise = new Main()
+        startPromise.run(this)
             .then(function (angular) {
                 this.$angular = angular;
                 // OpenMCT Object provider doesn't operate properly unless

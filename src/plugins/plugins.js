@@ -28,6 +28,7 @@ define([
     './autoflow/AutoflowTabularPlugin',
     './timeConductor/plugin',
     '../../example/imagery/plugin',
+    './imagery/plugin',
     '../../platform/import-export/bundle',
     './summaryWidget/plugin',
     './URLIndicatorPlugin/URLIndicatorPlugin',
@@ -45,6 +46,10 @@ define([
     './objectMigration/plugin',
     './goToOriginalAction/plugin',
     './clearData/plugin',
+    './webPage/plugin',
+    './themes/espresso',
+    './themes/maelstrom',
+    './themes/snow',
     './mongoTelemetryPlugin/plugin'
 ], function (
     _,
@@ -54,6 +59,7 @@ define([
     AutoflowPlugin,
     TimeConductorPlugin,
     ExampleImagery,
+    ImageryPlugin,
     ImportExport,
     SummaryWidget,
     URLIndicatorPlugin,
@@ -71,7 +77,11 @@ define([
     ObjectMigration,
     GoToOriginalAction,
     ClearData,
-    MongoTelemetryPlugin
+    WebPagePlugin,
+    Espresso,
+    Maelstrom,
+    Snow,
+    MongoTelemetryPlugin,
 ) {
     var bundleMap = {
         LocalStorage: 'platform/persistence/local',
@@ -156,6 +166,7 @@ define([
     };
 
     plugins.ExampleImagery = ExampleImagery;
+    plugins.ImageryPlugin = ImageryPlugin;
     plugins.Plot = PlotPlugin;
     plugins.TelemetryTable = TelemetryTablePlugin;
 
@@ -172,6 +183,10 @@ define([
     plugins.ObjectMigration = ObjectMigration.default;
     plugins.GoToOriginalAction = GoToOriginalAction.default;
     plugins.ClearData = ClearData;
+    plugins.WebPage = WebPagePlugin.default;
+    plugins.Espresso = Espresso.default;
+    plugins.Maelstrom = Maelstrom.default;
+    plugins.Snow = Snow.default;
 
     plugins.MongoTelemetryPlugin = MongoTelemetryPlugin;
 
