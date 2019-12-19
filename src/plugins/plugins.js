@@ -50,7 +50,8 @@ define([
     './themes/espresso',
     './themes/maelstrom',
     './themes/snow',
-    './mongoTelemetryPlugin/plugin'
+    './mongoTelemetryPlugin/plugin',
+    './missionControl/plugin',
 ], function (
     _,
     UTCTimeSystem,
@@ -82,6 +83,7 @@ define([
     Maelstrom,
     Snow,
     MongoTelemetryPlugin,
+    MissionControlPlugin,
 ) {
     var bundleMap = {
         LocalStorage: 'platform/persistence/local',
@@ -189,6 +191,8 @@ define([
     plugins.Snow = Snow.default;
 
     plugins.MongoTelemetryPlugin = MongoTelemetryPlugin;
+    plugins.MissionControlPlugin = MissionControlPlugin;
+
 
     return plugins;
 });

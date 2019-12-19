@@ -72,7 +72,7 @@ let objectProvider = {
 
 let compositionProvider = {
     appliesTo: function (domainObject) {
-        return domainObject.identifier.namespace.includes('example')
+        return domainObject.identifier.namespace.includes('sm.')
             && domainObject.hasOwnProperty('hasComposition')
             && domainObject['hasComposition'] === true;
     },
@@ -98,8 +98,13 @@ define([], function () {
             installed = true;
 
             openmct.objects.addRoot({
-                namespace: 'example.namespace',
-                key: '5dd297fb6824251bd4883780'
+                namespace: 'sm.folder',
+                key: '5dfb86ec9b98803e0cc078ea'
+            });
+
+            openmct.objects.addRoot({
+                namespace: 'sm.folder',
+                key: '5dfb902d9b98803e0cc078eb'
             });
 
             openmct.types.addType('sensor', {
@@ -108,14 +113,14 @@ define([], function () {
                 cssClass: 'icon-telemetry'
             });
 
-            openmct.types.addType('smf.sensor', {
+            openmct.types.addType('sm.sensor', {
                 name: 'Sensor',
                 description: 'Data source',
                 cssClass: 'icon-telemetry'
             });
 
-            openmct.objects.addProvider('example.namespace', objectProvider);
-            openmct.objects.addProvider('example.telemetry', objectProvider);
+            openmct.objects.addProvider('sm.folder', objectProvider);
+            openmct.objects.addProvider('sm.telemetry', objectProvider);
 
             openmct.composition.addProvider(compositionProvider);
 
