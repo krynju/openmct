@@ -119,6 +119,9 @@ define([], function () {
                 cssClass: 'icon-telemetry'
             });
 
+            openmct.objects.addProvider('sm.stationary_unit', objectProvider);
+            openmct.objects.addProvider('sm.mobile_unit', objectProvider);
+
             openmct.objects.addProvider('sm.folder', objectProvider);
             openmct.objects.addProvider('sm.telemetry', objectProvider);
 

@@ -17,13 +17,9 @@ define(['./MissionControlProvider'], function (MissionControlProvider) {
                 creatable: true,
                 description: "Allows creating and editing to-do lists.",
                 cssClass: 'icon-flexible-layout',
-                // initialize: function (domainObject) {
-                //     domainObject.configuration = {
-                //         containers: [new Container.default(50), new Container.default(50)],
-                //         rowsLayout: false
-                //     };
-                //     domainObject.composition = [];
-                // }
+                initialize(domainObject) {
+                    domainObject.composition = [];
+                }
             });
         };
     }
