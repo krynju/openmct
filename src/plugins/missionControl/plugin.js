@@ -1,6 +1,6 @@
 /*global define*/
 
-define([], function () {
+define(['./MissionControlProvider'], function (MissionControlProvider) {
 
     let installed = false;
 
@@ -10,8 +10,9 @@ define([], function () {
             if (installed) {
                 return;
             }
+            openmct.objectViews.addProvider(new MissionControlProvider(openmct));
 
-            openmct.types.addType('tutorials/todo', {
+            openmct.types.addType('mission', {
                 name: "To-do Plugin",
                 creatable: true,
                 description: "Allows creating and editing to-do lists.",
@@ -24,34 +25,6 @@ define([], function () {
                 //     domainObject.composition = [];
                 // }
             });
-            //
-            // openmct.legacyRegistry.register("", {
-            //     "name": "",
-            //     "description": "",
-            //     "extensions": {
-            //         "types": [
-            //             {
-            //                 "key": "example.todo",
-            //                 "name": "To-Do List",
-            //                 "cssClass": "icon-check",
-            //                 "description": "A list of things that need to be done.",
-            //                 "features": ["creation"]
-            //             }
-            //         ],
-            //         "views": [
-            //             {
-            //                 "key": "example.todo",
-            //                 "type": "example.todo",
-            //                 "cssClass": "icon-check",
-            //                 "name": "List",
-            //                 "templateUrl": "templates/missionControl.html",
-            //                 "editable": true
-            //             }
-            //         ]
-            //     }
-            // });
-
-
         };
     }
 
