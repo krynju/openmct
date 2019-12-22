@@ -251,7 +251,7 @@
 
 @mixin reverseEllipsis() {
     @include ellipsize();
-    direction: rtl;
+    direction: ltr;
     unicode-bidi:bidi-override;
 }
 
@@ -513,7 +513,7 @@
 
     &:before {
         // Adds an icon. Content defined in class.
-        direction: rtl; // Aligns glyph to right-hand side of container, for transition
+        direction: ltr; // Aligns glyph to right-hand side of container, for transition
         display: block;
         font-family: symbolsfont;
         flex: 0 0 auto;
