@@ -19,7 +19,7 @@ define(['./MissionControlProvider'], function (MissionControlProvider) {
                 cssClass: 'icon-flexible-layout',
                 initialize(domainObject) {
                     domainObject.composition = [];
-                    domainObject.mission_mode = 'creation';
+                    domainObject.mission_mode = '';
                     domainObject.__mission_obj = {};
                 }
             });

@@ -3,24 +3,38 @@
         <a class="c-button" v-on:click="sm_upload" v-if="domainObject.mission_mode === 'creation'">Upload</a>
         <a class="c-button" v-on:click="sm_remove" v-if="domainObject.mission_mode === 'active'">Terminate</a>
         <a class="c-button" v-on:click="haha">adwadw2ad</a>
-        <div><p>goal: 100 data points</p></div>
+<!--        <div><p>goal: 100 data points</p></div>-->
 
-        <input v-if="domainObject.mission_mode === 'creation'" v-model="vname">
+        <h2 style="color: #2294a2" >Mission name: <a v-if="domainObject.mission_mode!=='creation'">{{domainObject.name}}</a> </h2>
+        <input class="c-input-inline c-input--flex" v-if="domainObject.mission_mode==='creation'" v-model="vname">
 
-        <h2>Objects to monitor</h2>
+        <h2 style="color: #2294a2" >Status: <a>{{domainObject.mission_mode}}</a></h2>
+
+        <h2 style="color: #2294a2">Objects to monitor</h2>
         <p v-if="stationary_items_only(items).length === 0 && domainObject.mission_mode === 'creation'"> Drag and drop
             stationary units or single telemetry
             objects.</p>
         <div v-for="item in stationary_items_only(items)">
-            <label :for="item.key">{{item.domainObject.name}}, {{item.key}}</label>
+            <h3 :for="item.key">> {{item.domainObject.name}}</h3>
+            <p>>>> {{item.key}}</p>
         </div>
 
-        <h2>Job for mobile units:</h2>
+        <h2 style="color: #2294a2" >Job for mobile units:</h2>
         <p v-if="mobile_items_only(items).length === 0 && domainObject.mission_mode === 'creation'"> Drag and drop
             mobile units.</p>
         <div v-for="item in mobile_items_only(items)">
-            <label :for="item.key">{{item.domainObject.name}}, {{item.key}}</label>
+            <h3 :for="item.key">> {{item.domainObject.name}}</h3>
+            <p>>>> {{item.key}}</p>
         </div>
+
+
+        <h2 style="color: #2294a2" >Mission type: <a v-if="domainObject.mission_mode!=='creation'">{{domainObject.sm_goal}}</a></h2>
+        <select v-model="goal" v-if="domainObject.mission_mode==='creation'">
+            <option v-bind:value="'Accompany'">Accompany</option>
+            <option v-bind:value=" 'Patrol'">Patrol</option>
+
+        </select>
+
 
     </div>
 
@@ -39,18 +53,14 @@
     }
 
     async function mission_endpoint(key, body) {
-        let response
+        let response;
         let link = BACKEND_ADDRESS + '/mission';
-        if (key !== ''){
+        if (key !== '') {
             link = link + '?key=' + key.toString();
             response = await fetch(link, {method: "post"});
-    }
-        else{
+        } else {
             response = await fetch(link, {method: "post", body: JSON.stringify(body)});
-
         }
-
-
         return await response.json()
     }
 
@@ -62,7 +72,8 @@
         data() {
             return {
                 items: [],
-                vname: "",
+                vname: this.domainObject.name,
+                goal: 'Accompany'
             }
         },
         mounted() {
@@ -72,14 +83,18 @@
             this.composition.on('reorder', this.reorder);
             this.composition.load();
 
-            if (this.domainObject.identifier.namespace === "")
+            if (!this.domainObject['_id'])
                 getObject_openmct(this.domainObject.identifier.key.toString())
                     .then(response => {
                         if (response !== "not found") {
-                            this.domainObject.__mission_obj = response;
-                            this.domainObject.mission_mode = response['mission_mode']
+                            this.domainObject['_id'] = response['_id'];
+                            this.domainObject.mission_mode = response['mission_mode'];
+                            this.vname = response['name'];
                         }
+                        else
+                            this.domainObject.mission_mode = 'creation'
                     });
+
 
         },
         destroyed() {
@@ -119,25 +134,38 @@
 
             sm_upload() {
                 if (this.stationary_items_only(this.items).length === 0 || this.mobile_items_only(this.items).length === 0)
+                {
+                    alert('Please drag and drop at least one of mobile and stationary items');
                     return;
+                }
                 let mission_obj = {
                     name: this.vname === "" ? "RANDOMNAME" : this.vname,
                     mission_mode: 'active',
                     secondary_id: this.domainObject.identifier.key,
                     sm_monitor: this.stationary_items_only(this.items).map(x => x.domainObject._id),
                     sm_mobile: this.mobile_items_only(this.items).map(x => x.domainObject._id),
-                    sm_goal: 'null',
+                    sm_goal: this.goal,
                     composition: this.mobile_items_only(this.items).concat(this.stationary_items_only(this.items)).map(x => x.domainObject._id)
                 };
                 mission_endpoint('', mission_obj)
                     .then(response => {
-                        this.domainObject.mission_mode = 'created';
+                        this.domainObject.__mission_obj = response;
+                        this.domainObject['_id'] = response['_id'];
+                        this.domainObject.mission_mode = response['mission_mode']
+                        this.domainObject.name = response['name']
+                        this.domainObject.sm_goal = response['sm_goal']
+
+
                     });
 
             },
             sm_remove() {
-                mission_endpoint(this.domainObject['__mission_obj']['_id']['$oid'], {})
-                    .then(response => this.domainObject.mission_mode = 'inactive');
+                mission_endpoint(this.domainObject['_id']['$oid'], {})
+                    .then(response => {
+                        console.log(response)
+                        this.domainObject.mission_mode= response['mission_mode']
+                    });
+
             },
             haha() {
                 console.log(this.domainObject)
