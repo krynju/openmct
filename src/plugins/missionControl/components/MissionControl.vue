@@ -1,20 +1,25 @@
 <template>
     <div>
-        <!--        <p>heelllooo</p>-->
-        <!--        <p> {{domainObject}}</p>-->
-        <button v-on:click="haha">upload</button>
-        <button v-on:click="haha">update</button>
-        <button v-on:click="haha">remove</button>
-
+        <a class="c-button" v-on:click="sm_upload" v-if="domainObject.mission_mode === 'creation'">Upload</a>
+        <a class="c-button" v-on:click="sm_remove" v-if="domainObject.mission_mode === 'active'">Terminate</a>
+        <a class="c-button" v-on:click="haha">adwadw2ad</a>
         <div><p>goal: 100 data points</p></div>
 
+        <input v-if="domainObject.mission_mode === 'creation'" v-model="vname">
 
+        <h2>Objects to monitor</h2>
+        <p v-if="stationary_items_only(items).length === 0 && domainObject.mission_mode === 'creation'"> Drag and drop
+            stationary units or single telemetry
+            objects.</p>
         <div v-for="item in stationary_items_only(items)">
-            <input :id="item.key" :value="item" type="checkbox" v-model="checked_stat_items">
-            <label :for="item.key">{{item.key}}</label>
+            <label :for="item.key">{{item.domainObject.name}}, {{item.key}}</label>
         </div>
-        <div>
-            <p v-for="item in mobile_items_only(items)">{{item.domainObject.name}}</p>
+
+        <h2>Job for mobile units:</h2>
+        <p v-if="mobile_items_only(items).length === 0 && domainObject.mission_mode === 'creation'"> Drag and drop
+            mobile units.</p>
+        <div v-for="item in mobile_items_only(items)">
+            <label :for="item.key">{{item.domainObject.name}}, {{item.key}}</label>
         </div>
 
     </div>
@@ -23,6 +28,32 @@
 
 <script>
 
+    const BACKEND_ADDRESS = "http://localhost:5000";
+
+    async function getObject_openmct(key) {
+        let response = await fetch(BACKEND_ADDRESS + '/objects_openmct' + '?key=' + key.toString(), {method: "get"});
+        if (response.status !== 204)
+            return await response.json();
+        else
+            return "not found"
+    }
+
+    async function mission_endpoint(key, body) {
+        let response
+        let link = BACKEND_ADDRESS + '/mission';
+        if (key !== ''){
+            link = link + '?key=' + key.toString();
+            response = await fetch(link, {method: "post"});
+    }
+        else{
+            response = await fetch(link, {method: "post", body: JSON.stringify(body)});
+
+        }
+
+
+        return await response.json()
+    }
+
 
     export default {
         inject: ['openmct', 'domainObject', 'objectPath'],
@@ -30,12 +61,8 @@
         name: "MissionControl",
         data() {
             return {
-                stationary: null,
-                composition_stationary: [],
-                mobile: null,
-                composition_mobile: [],
                 items: [],
-                checked_stat_items: [],
+                vname: "",
             }
         },
         mounted() {
@@ -44,6 +71,16 @@
             this.composition.on('remove', this.removeItem);
             this.composition.on('reorder', this.reorder);
             this.composition.load();
+
+            if (this.domainObject.identifier.namespace === "")
+                getObject_openmct(this.domainObject.identifier.key.toString())
+                    .then(response => {
+                        if (response !== "not found") {
+                            this.domainObject.__mission_obj = response;
+                            this.domainObject.mission_mode = response['mission_mode']
+                        }
+                    });
+
         },
         destroyed() {
             this.composition.off('add', this.addItem);
@@ -80,39 +117,30 @@
                 });
             },
 
-            stationary_fill: function (obj) {
-                this.stationary = obj;
-                this.openmct.composition
-                    .get(obj)
-                    .load()
-                    .then(r => this.composition_stationary = r)
+            sm_upload() {
+                if (this.stationary_items_only(this.items).length === 0 || this.mobile_items_only(this.items).length === 0)
+                    return;
+                let mission_obj = {
+                    name: this.vname === "" ? "RANDOMNAME" : this.vname,
+                    mission_mode: 'active',
+                    secondary_id: this.domainObject.identifier.key,
+                    sm_monitor: this.stationary_items_only(this.items).map(x => x.domainObject._id),
+                    sm_mobile: this.mobile_items_only(this.items).map(x => x.domainObject._id),
+                    sm_goal: 'null',
+                    composition: this.mobile_items_only(this.items).concat(this.stationary_items_only(this.items)).map(x => x.domainObject._id)
+                };
+                mission_endpoint('', mission_obj)
+                    .then(response => {
+                        this.domainObject.mission_mode = 'created';
+                    });
+
             },
-
-            mobile_fill: function (obj) {
-                this.mobile = obj;
-                this.openmct.composition
-                    .get(obj)
-                    .load()
-                    .then(r => this.composition_mobile = r)
-
+            sm_remove() {
+                mission_endpoint(this.domainObject['__mission_obj']['_id']['$oid'], {})
+                    .then(response => this.domainObject.mission_mode = 'inactive');
             },
-
-            haha: function () {
-                console.log(this.checked_stat_items)
-                this.openmct.objects.rootProvider.get()
-                    .then(result => result.composition
-                        .filter(x => !!x.namespace && x.namespace === 'sm.folder')
-                        .map(x => this.openmct.objects.get(x)))
-                    .then(result => {
-                        for (let x of result) {
-                            x.then(y => {
-                                if (y.name === "Stationary Sensors" && y.type === "folder")
-                                    this.stationary_fill(y);
-                                else if (y.name === "Mobile Units" && y.type === "folder")
-                                    this.mobile_fill(y);
-                            })
-                        }
-                    })
+            haha() {
+                console.log(this.domainObject)
             }
         }
     }

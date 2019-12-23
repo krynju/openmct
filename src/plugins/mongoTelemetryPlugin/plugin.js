@@ -119,12 +119,11 @@ define([], function () {
                 cssClass: 'icon-telemetry'
             });
 
-            openmct.objects.addProvider('sm.stationary_unit', objectProvider);
-            openmct.objects.addProvider('sm.mobile_unit', objectProvider);
+            let namespaces = ['sm.stationary_unit','sm.mobile_unit','sm.folder','sm.telemetry', 'sm.mission']
+            for(let i of namespaces){
+                openmct.objects.addProvider(i, objectProvider);
 
-            openmct.objects.addProvider('sm.folder', objectProvider);
-            openmct.objects.addProvider('sm.telemetry', objectProvider);
-
+            }
             openmct.composition.addProvider(compositionProvider);
 
             openmct.telemetry.addProvider(historicalDataProvider);

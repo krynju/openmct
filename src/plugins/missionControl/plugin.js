@@ -13,12 +13,14 @@ define(['./MissionControlProvider'], function (MissionControlProvider) {
             openmct.objectViews.addProvider(new MissionControlProvider(openmct));
 
             openmct.types.addType('mission', {
-                name: "To-do Plugin",
+                name: "Mission Interface",
                 creatable: true,
-                description: "Allows creating and editing to-do lists.",
+                description: "Allows for control over missions",
                 cssClass: 'icon-flexible-layout',
                 initialize(domainObject) {
                     domainObject.composition = [];
+                    domainObject.mission_mode = 'creation';
+                    domainObject.__mission_obj = {};
                 }
             });
         };
