@@ -2,7 +2,7 @@
     <div>
         <a class="c-button" v-on:click="sm_upload" v-if="domainObject.mission_mode === 'creation'">Upload</a>
         <a class="c-button" v-on:click="sm_remove" v-if="domainObject.mission_mode === 'active'">Terminate</a>
-        <a class="c-button" v-on:click="haha">adwadw2ad</a>
+<!--        <a class="c-button" v-on:click="haha">adwadw2ad</a>-->
 <!--        <div><p>goal: 100 data points</p></div>-->
 
         <h2 style="color: #2294a2" >Mission name: <a v-if="domainObject.mission_mode!=='creation'">{{domainObject.name}}</a> </h2>

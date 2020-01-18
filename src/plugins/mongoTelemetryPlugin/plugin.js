@@ -122,7 +122,6 @@ define([], function () {
             let namespaces = ['sm.stationary_unit','sm.mobile_unit','sm.folder','sm.telemetry', 'sm.mission']
             for(let i of namespaces){
                 openmct.objects.addProvider(i, objectProvider);
-
             }
             openmct.composition.addProvider(compositionProvider);
 
