@@ -2,13 +2,14 @@
     <div>
         <a class="c-button" v-on:click="sm_upload" v-if="domainObject.mission_mode === 'creation'">Upload</a>
         <a class="c-button" v-on:click="sm_remove" v-if="domainObject.mission_mode === 'active'">Terminate</a>
-<!--        <a class="c-button" v-on:click="haha">adwadw2ad</a>-->
-<!--        <div><p>goal: 100 data points</p></div>-->
+        <!--        <a class="c-button" v-on:click="haha">adwadw2ad</a>-->
+        <!--        <div><p>goal: 100 data points</p></div>-->
 
-        <h2 style="color: #2294a2" >Mission name: <a v-if="domainObject.mission_mode!=='creation'">{{domainObject.name}}</a> </h2>
+        <h2 style="color: #2294a2">Mission name: <a
+                v-if="domainObject.mission_mode!=='creation'">{{domainObject.name}}</a></h2>
         <input class="c-input-inline c-input--flex" v-if="domainObject.mission_mode==='creation'" v-model="vname">
 
-        <h2 style="color: #2294a2" >Status: <a>{{domainObject.mission_mode}}</a></h2>
+        <h2 style="color: #2294a2">Status: <a>{{domainObject.mission_mode}}</a></h2>
 
         <h2 style="color: #2294a2">Objects to monitor</h2>
         <p v-if="stationary_items_only(items).length === 0 && domainObject.mission_mode === 'creation'"> Drag and drop
@@ -19,7 +20,7 @@
             <p>>>> {{item.key}}</p>
         </div>
 
-        <h2 style="color: #2294a2" >Job for mobile units:</h2>
+        <h2 style="color: #2294a2">Job for mobile units:</h2>
         <p v-if="mobile_items_only(items).length === 0 && domainObject.mission_mode === 'creation'"> Drag and drop
             mobile units.</p>
         <div v-for="item in mobile_items_only(items)">
@@ -28,11 +29,12 @@
         </div>
 
 
-        <h2 style="color: #2294a2" >Mission type: <a v-if="domainObject.mission_mode!=='creation'">{{domainObject.sm_goal}}</a></h2>
+        <h2 style="color: #2294a2">Mission type: <a v-if="domainObject.mission_mode!=='creation'">{{domainObject.sm_goal}}</a>
+        </h2>
         <select v-model="goal" v-if="domainObject.mission_mode==='creation'">
             <option v-bind:value="'Accompany'">Accompany</option>
             <option v-bind:value=" 'Patrol'">Patrol</option>
-
+            <option v-bind:value=" 'Scout'">Patrol</option>
         </select>
 
 
@@ -90,8 +92,7 @@
                             this.domainObject['_id'] = response['_id'];
                             this.domainObject.mission_mode = response['mission_mode'];
                             this.vname = response['name'];
-                        }
-                        else
+                        } else
                             this.domainObject.mission_mode = 'creation'
                     });
 
@@ -133,8 +134,7 @@
             },
 
             sm_upload() {
-                if (this.stationary_items_only(this.items).length === 0 || this.mobile_items_only(this.items).length === 0)
-                {
+                if (this.stationary_items_only(this.items).length === 0 || this.mobile_items_only(this.items).length === 0) {
                     alert('Please drag and drop at least one of mobile and stationary items');
                     return;
                 }
@@ -145,14 +145,15 @@
                     sm_monitor: this.stationary_items_only(this.items).map(x => x.domainObject._id),
                     sm_mobile: this.mobile_items_only(this.items).map(x => x.domainObject._id),
                     sm_goal: this.goal,
+                    state: {limit:10},
                     composition: this.mobile_items_only(this.items).concat(this.stationary_items_only(this.items)).map(x => x.domainObject._id)
                 };
                 mission_endpoint('', mission_obj)
                     .then(response => {
                         this.domainObject.__mission_obj = response;
                         this.domainObject['_id'] = response['_id'];
-                        this.domainObject.mission_mode = response['mission_mode']
-                        this.domainObject.name = response['name']
+                        this.domainObject.mission_mode = response['mission_mode'];
+                        this.domainObject.name = response['name'];
                         this.domainObject.sm_goal = response['sm_goal']
 
 
@@ -162,14 +163,12 @@
             sm_remove() {
                 mission_endpoint(this.domainObject['_id']['$oid'], {})
                     .then(response => {
-                        console.log(response)
-                        this.domainObject.mission_mode= response['mission_mode']
+                        console.log(response);
+                        this.domainObject.mission_mode = response['mission_mode']
                     });
 
             },
-            haha() {
-                console.log(this.domainObject)
-            }
+
         }
     }
 </script>
