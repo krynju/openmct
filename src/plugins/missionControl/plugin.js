@@ -13,7 +13,7 @@ define(['./MissionControlProvider'], function (MissionControlProvider) {
             openmct.objectViews.addProvider(new MissionControlProvider(openmct));
 
             openmct.types.addType('mission', {
-                name: "Mission Interface",
+                name: "Task Interface",
                 creatable: true,
                 description: "Allows for control over missions",
                 cssClass: 'icon-flexible-layout',

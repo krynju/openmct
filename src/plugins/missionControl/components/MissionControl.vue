@@ -1,11 +1,12 @@
 <template>
     <div>
         <a class="c-button" v-on:click="sm_upload" v-if="domainObject.mission_mode === 'creation'">Upload</a>
+
         <a class="c-button" v-on:click="sm_remove" v-if="domainObject.mission_mode === 'active'">Terminate</a>
-        <!--        <a class="c-button" v-on:click="haha">adwadw2ad</a>-->
+<!--                <a class="c-button" v-on:click="haha">adwadw2ad</a>-->
         <!--        <div><p>goal: 100 data points</p></div>-->
 
-        <h2 style="color: #2294a2">Mission name: <a
+        <h2 style="color: #2294a2">Task name: <a
                 v-if="domainObject.mission_mode!=='creation'">{{domainObject.name}}</a></h2>
         <input class="c-input-inline c-input--flex" v-if="domainObject.mission_mode==='creation'" v-model="vname">
 
@@ -29,13 +30,32 @@
         </div>
 
 
-        <h2 style="color: #2294a2">Mission type: <a v-if="domainObject.mission_mode!=='creation'">{{domainObject.sm_goal}}</a>
+        <h2 style="color: #2294a2">Task type: <a v-if="domainObject.mission_mode!=='creation'">{{domainObject.sm_goal}}</a>
         </h2>
         <select v-model="goal" v-if="domainObject.mission_mode==='creation'">
             <option v-bind:value="'Accompany'">Accompany</option>
             <option v-bind:value=" 'Patrol'">Patrol</option>
-            <option v-bind:value=" 'Scout'">Patrol</option>
+            <option v-bind:value=" 'Scout'">Scout</option>
         </select>
+
+        <div v-if="goal === 'Scout' && domainObject.mission_mode==='creation'">
+            <p>Data points:</p>
+            <select v-model="limit">
+                <option v-bind:value="50">50</option>
+                <option v-bind:value="100">100</option>
+                <option v-bind:value="200">200</option>
+            </select>
+        </div>
+
+
+
+        <h2 style="color: #2294a2" v-if="domainObject.mission_mode !== 'creation'">Status: </h2>
+        <a class="c-button" v-on:click="check_status" v-if="domainObject.mission_mode !== 'creation'">Refresh status</a>
+
+        <div v-for="item in sm_monitor">
+            <p v-if="state[item.$oid]">{{item.$oid}} :  {{state[item.$oid]}} / {{state['limit']}}</p>
+        </div>
+
 
 
     </div>
@@ -68,14 +88,17 @@
 
 
     export default {
-        inject: ['openmct', 'domainObject', 'objectPath'],
+        inject: ['openmct', 'domainObject', 'objectPath' ],
 
         name: "MissionControl",
         data() {
             return {
                 items: [],
                 vname: this.domainObject.name,
-                goal: 'Accompany'
+                goal: 'Accompany',
+                limit: 200,
+                sm_monitor : [],
+                state :{}
             }
         },
         mounted() {
@@ -89,9 +112,13 @@
                 getObject_openmct(this.domainObject.identifier.key.toString())
                     .then(response => {
                         if (response !== "not found") {
+                            console.log(response)
                             this.domainObject['_id'] = response['_id'];
                             this.domainObject.mission_mode = response['mission_mode'];
                             this.vname = response['name'];
+                            this.sm_monitor = response['sm_monitor'];
+                            this.state = response['state']
+                            this.domainObject.sm_goal = response['sm_goal']
                         } else
                             this.domainObject.mission_mode = 'creation'
                     });
@@ -145,7 +172,7 @@
                     sm_monitor: this.stationary_items_only(this.items).map(x => x.domainObject._id),
                     sm_mobile: this.mobile_items_only(this.items).map(x => x.domainObject._id),
                     sm_goal: this.goal,
-                    state: {limit:10},
+                    state: {limit: this.limit},
                     composition: this.mobile_items_only(this.items).concat(this.stationary_items_only(this.items)).map(x => x.domainObject._id)
                 };
                 mission_endpoint('', mission_obj)
@@ -154,7 +181,9 @@
                         this.domainObject['_id'] = response['_id'];
                         this.domainObject.mission_mode = response['mission_mode'];
                         this.domainObject.name = response['name'];
-                        this.domainObject.sm_goal = response['sm_goal']
+                        this.domainObject.sm_goal = response['sm_goal'];
+                        this.sm_monitor = response['sm_monitor'];
+                        this.state = response['state'];
 
 
                     });
@@ -169,6 +198,26 @@
 
             },
 
+            haha(){
+                console.log(this.domainObject);
+                console.log(this.sm_monitor);
+            },
+
+            check_status(){
+                getObject_openmct(this.domainObject.identifier.key.toString())
+                    .then(response => {
+                        if (response !== "not found") {
+                            // console.log(response);
+                            this.domainObject['_id'] = response['_id'];
+                            this.domainObject.mission_mode = response['mission_mode'];
+                            this.vname = response['name'];
+                            this.sm_monitor = response['sm_monitor'];
+                            this.state = response['state'];
+                            this.domainObject.sm_goal = response['sm_goal']
+                        } else
+                            this.domainObject.mission_mode = 'creation'
+                    });
+            }
         }
     }
 </script>
